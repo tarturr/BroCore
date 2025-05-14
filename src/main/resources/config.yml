@@ -1,0 +1,2 @@
+# The path to the SQLite database file.
+path_to_db: "bros_data/bros_data.db"

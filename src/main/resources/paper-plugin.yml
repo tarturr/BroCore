@@ -1,0 +1,6 @@
+name: BroCore
+author: Tartur_
+version: 1.0
+api-version: 1.21
+main: fr.tartur.games.Core
+loader: fr.tartur.games.CoreLoader
