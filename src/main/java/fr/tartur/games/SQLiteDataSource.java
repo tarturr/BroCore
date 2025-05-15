@@ -147,12 +147,6 @@ public class SQLiteDataSource {
      * process.
      */
     private boolean initWithFile(File initFile) {
-        final Optional<Connection> connectionTrial = this.getConnection();
-        
-        if (connectionTrial.isEmpty()) {
-            return false;
-        }
-        
         final String init;
         
         try (final FileInputStream input = new FileInputStream(initFile)) {
