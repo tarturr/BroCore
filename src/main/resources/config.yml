@@ -1,2 +1,6 @@
-# The path to the SQLite database file.
-path_to_db: "bros_data/bros_data.db"
+database:
+  # The database initialization SQL script. If not found, the plugin will create a default one.
+  init: "init-db.sql"
+  
+  # The path to the SQLite database file.
+  file: "bros_data/bros_data.db"

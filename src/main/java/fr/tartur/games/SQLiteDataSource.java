@@ -2,35 +2,35 @@ package fr.tartur.games;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.bukkit.configuration.file.FileConfiguration;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 /**
  * Class holding the SQLite data source.
  */
 public class SQLiteDataSource {
-
-    private static final Logger log = LogManager.getLogger(SQLiteDataSource.class);
     
     private final HikariDataSource database;
+    private final Core core;
+    private final Logger log;
 
     /**
      * Creates a new setup for the SQLite database.
      * 
-     * @param pluginConfig The {@code config.yml} plugin file.
+     * @param core The plugin instance.
      */
-    public SQLiteDataSource(FileConfiguration pluginConfig) {
+    public SQLiteDataSource(Core core) {
+        this.core = core;
+        this.log = core.getLogger();
+        
         final HikariConfig config = new HikariConfig();
         config.setDataSourceClassName("org.sqlite.SQLiteDataSource");
-        config.setJdbcUrl("jdbc:sqlite:" + pluginConfig.get("path_to_db"));
+        config.setJdbcUrl("jdbc:sqlite:" + this.getPath("database.file"));
         this.database = new HikariDataSource(config);
     }
 
@@ -42,24 +42,41 @@ public class SQLiteDataSource {
      * @param initFileStream The {@code InputStream} containing the appropriated SQL statement.
      */
     public void init(InputStream initFileStream) {
+        final Optional<File> initFile = this.getInitFile();
+        
+        // If a SQL file was found AND the database could be initialized using its contents.
+        if (initFile.isPresent() && this.initWithFile(initFile.get())) {
+            log.info("The database was successfully initialized with the already existing SQL file.");
+            return;
+        }
+        
+        log.info("No existing SQL initialization file could be read. Trying to create one which contains basic SQL " +
+                "initialization code...");
+        
         if (initFileStream == null) {
-            log.warn("Could not find the file containing the statements initializing the SQLite tables.");
-            return;
+            throw new RuntimeException("The SQL initialization file was removed from the plugin resources folder and " +
+                    "no existing file could be read at the location provided in config.yml");
         }
         
-        try (initFileStream; final Statement statement = this.database.getConnection().createStatement()) {
-            final String init = new String(initFileStream.readAllBytes());
-            log.info("Initializing tables with statement:\n{}", init);
-            statement.executeUpdate(init);
+        final byte[] sql;
+        
+        try (initFileStream) {
+            sql = initFileStream.readAllBytes();
         } catch (IOException exception) {
-            log.error("An error has occurred while reading the SQLite init program", exception);
-            return;
-        } catch (SQLException exception) {
-            log.error("An error has occurred while initializing the SQLite tables", exception);
-            return;
+            throw new RuntimeException(exception);
         }
         
-        log.info("Successfully initialized the SQLite database.");
+        if (this.createInitFile(sql)) {
+            log.info("Successfully created the basic SQL file!");
+        } else {
+            log.warning("Could not create the basic SQL file.");
+        }
+        
+        log.info("Initializing the SQLite tables with the basic SQL initialization code...");
+        
+        if (this.initSQLTables(new String(sql))) {
+            log.info("Success!");
+        }
     }
 
     /**
@@ -73,7 +90,7 @@ public class SQLiteDataSource {
         try {
             return Optional.of(this.database.getConnection());
         } catch (SQLException exception) {
-            log.warn("Could not establish a connection to the SQLite database", exception);
+            log.warning("Could not establish a connection to the SQLite database: " + exception);
             return Optional.empty();
         }
     }
@@ -84,6 +101,102 @@ public class SQLiteDataSource {
     public void close() {
         this.database.close();
         log.info("SQLite database connection was closed.");
+    }
+
+    /**
+     * Gets the SQL initialization file if it exists and returns it in an {@code Optional<File>}, or
+     * {@code Optional.empty()} if it does not.
+     * 
+     * @return An {@link Optional<File>} which contains the SQL initialization file if it exists, or
+     * {@link Optional#empty()} if it does not.
+     */
+    private Optional<File> getInitFile() {
+        final File init = new File(this.getPath("database.init"));
+        return init.exists() ? Optional.of(init) : Optional.empty();
+    }
+
+    /**
+     * Creates the SQLite initialisation file with the provided data if it does not exist and no exception was thrown
+     * during the creation process.
+     * 
+     * @param code The SQL initialization code.
+     * @return {@code true} if the file was successfully created, {@code false} otherwise.
+     */
+    private boolean createInitFile(byte[] code) {
+        final File init = new File(this.getPath("database.init"));
+        
+        try {
+            if (init.createNewFile()) {
+                try (final FileOutputStream output = new FileOutputStream(init)) {
+                    output.write(code);
+                }
+            }
+        } catch (IOException exception) {
+            log.warning("Could not create the SQL initialization file.");
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
+     * Initializes the SQLite database with the provided SQL file.
+     * 
+     * @param initFile The file containing the SQL initialization code.
+     * @return {@code true} if the initialization was successful, {@code false} if any exception was thrown during the
+     * process.
+     */
+    private boolean initWithFile(File initFile) {
+        final Optional<Connection> connectionTrial = this.getConnection();
+        
+        if (connectionTrial.isEmpty()) {
+            return false;
+        }
+        
+        final String init;
+        
+        try (final FileInputStream input = new FileInputStream(initFile)) {
+            init = new String(input.readAllBytes());
+        } catch (IOException exception) {
+            log.severe("An error has occurred while reading the new SQL initialization file: " + exception);
+            return false;
+        }
+        
+        return this.initSQLTables(init);
+    }
+
+    /**
+     * Initializes the database using the provided SQL request.
+     * 
+     * @param request The SQL request which will initialize the database.
+     * @return {@code true} if the database was successfully initialized, {@code false} otherwise.
+     */
+    private boolean initSQLTables(String request) {
+        final Optional<Connection> connectionTrial = this.getConnection();
+        
+        if (connectionTrial.isEmpty()) {
+            return false;
+        }
+        
+        try (final Statement statement = connectionTrial.get().createStatement()) {
+            statement.executeUpdate(request);
+        } catch (SQLException exception) {
+            log.severe("An error has occurred while initializing the SQLite tables: " + exception);
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
+     * Returns the path (relative to the server folder) to the file specified by the provided configuration section
+     * (only relative to the plugin data folder).
+     * 
+     * @param confPath The configuration path indicating the file path.
+     * @return The file path (relative to the server folder).
+     */
+    private String getPath(String confPath) {
+        return this.core.getDataPath() + File.separator + this.core.getConfig().getString(confPath);
     }
     
 }

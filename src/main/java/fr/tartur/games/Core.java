@@ -10,7 +10,7 @@ public class Core extends JavaPlugin {
     public void onEnable() {
         super.saveDefaultConfig();
         
-        this.source = new SQLiteDataSource(getConfig());
+        this.source = new SQLiteDataSource(this);
         this.source.init(getResource("init-db.sql"));
         
         getLogger().info("The BROS CORE is LOADED!!! GLHF my BABYCHOUUUUS");
