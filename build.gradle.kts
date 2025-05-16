@@ -2,19 +2,16 @@ plugins {
     id("java")
 }
 
-group = "fr.tartur.games"
+
+group = "com.github.tarturr"
 version = "v1.0"
 
 repositories {
     mavenCentral()
-    
+
     maven {
         name = "papermc"
         url = uri("https://repo.papermc.io/repository/maven-public/")
-    }
-    
-    maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-        name = "sonatype-oss-snapshots"
     }
 }
 

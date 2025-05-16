@@ -1,4 +1,4 @@
-package fr.tartur.games;
+package com.github.tarturr.brocore;
 
 import io.papermc.paper.plugin.loader.PluginClasspathBuilder;
 import io.papermc.paper.plugin.loader.PluginLoader;
