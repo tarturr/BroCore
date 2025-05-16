@@ -1,4 +1,4 @@
-package com.github.tarturr.brocore;
+package fr.tartur.brocore;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

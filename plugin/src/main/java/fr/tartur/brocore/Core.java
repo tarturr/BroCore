@@ -1,6 +1,7 @@
-package com.github.tarturr.brocore;
+package fr.tartur.brocore;
 
-import com.github.tarturr.brocore.entity.BroPlayerManager;
+import fr.tartur.brocore.entity.BroPlayerManager;
+import fr.tartur.brocore.entity.BroPlayerManagerImpl;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Core extends JavaPlugin {
@@ -15,7 +16,7 @@ public class Core extends JavaPlugin {
         this.source = new SQLiteDataSource(this);
         this.source.init(getResource("init-db.sql"));
         
-        this.manager = new BroPlayerManager(getLogger(), this.source);
+        this.manager = new BroPlayerManagerImpl(getLogger(), this.source);
         
         getLogger().info("The BROS CORE is LOADED!!! GLHF my BABYCHOUUUUS");
     }

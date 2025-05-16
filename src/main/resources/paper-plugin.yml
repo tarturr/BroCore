@@ -1,6 +1,0 @@
-name: BroCore
-author: Tartur_
-version: 1.0
-api-version: 1.21
-main: com.github.tarturr.brocore.Core
-loader: com.github.tarturr.brocore.CoreLoader

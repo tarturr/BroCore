@@ -1,6 +1,6 @@
-package com.github.tarturr.brocore.entity;
+package fr.tartur.brocore.entity;
 
-import com.github.tarturr.brocore.SQLiteDataSource;
+import fr.tartur.brocore.SQLiteDataSource;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
@@ -12,10 +12,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Logger;
 
-/**
- * Class managing the data of a {@link BroPlayer} list, including caching and database interactions.
- */
-public class BroPlayerManager {
+public class BroPlayerManagerImpl implements BroPlayerManager {
     
     private final Map<UUID, BroPlayer> players;
     private final Logger log;
@@ -28,54 +25,36 @@ public class BroPlayerManager {
      * @param log The plugin {@link Logger}.
      * @param source The {@link SQLiteDataSource} needed to make database interactions.
      */
-    public BroPlayerManager(Logger log, SQLiteDataSource source) {
+    public BroPlayerManagerImpl(Logger log, SQLiteDataSource source) {
         this.log = log;
         this.players = new HashMap<>();
         this.source = source;
     }
 
-    /**
-     * Might get the {@code BroPlayer} associated to this player if he is connected.
-     *
-     * @param player The player to get the {@link BroPlayer} object from.
-     * @return An {@link Optional} containing the {@link BroPlayer} instance, or {@link Optional#empty()} if he was not
-     * found.
-     */
+    @Override
     public Optional<BroPlayer> getPlayer(Player player) {
         return Optional.ofNullable(this.players.get(player.getUniqueId()));
     }
 
-    /**
-     * Adds a player to the {@code BroPlayer} list.
-     *
-     * @param player The connecting player.
-     */
+    @Override
     public void join(Player player) {
         final UUID uuid = player.getUniqueId();
-        final BroPlayer broPlayer = new BroPlayer(uuid);
+        final BroPlayer broPlayer = new BroPlayerImpl(uuid);
         this.fetch(broPlayer);
         this.players.put(uuid, broPlayer);
     }
 
-    /**
-     * Removes a player from the {@code BroPlayer} list.
-     *
-     * @param player The disconnecting player.
-     */
+    @Override
     public void leave(Player player) {
         final UUID uuid = player.getUniqueId();
-        final BroPlayer broPlayer = this.players.remove(uuid);
+        final BroPlayer broPlayerImpl = this.players.remove(uuid);
         
-        if (broPlayer != null) {
-            this.save(broPlayer);
+        if (broPlayerImpl != null) {
+            this.save(broPlayerImpl);
         }
     }
 
-    /**
-     * Saves the data of the provided player in the database.
-     *
-     * @param player The player which needs its data to be saved.
-     */
+    @Override
     public void save(BroPlayer player) {
         if (!player.isEdited()) {
             return;
@@ -107,18 +86,12 @@ public class BroPlayerManager {
         }
     }
 
-    /**
-     * Saves the data from all the connected players.
-     */
+    @Override
     public void saveAll() {
         this.players.values().forEach(this::save);
     }
 
-    /**
-     * Fetches the provided player's data from the database.
-     *
-     * @param player The player which needs its data to be fetched.
-     */
+    @Override
     public void fetch(BroPlayer player) {
         final Optional<Connection> connectionTrial = this.source.getConnection();
         

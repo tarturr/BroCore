@@ -1,4 +1,4 @@
-package com.github.tarturr.brocore;
+package fr.tartur.brocore;
 
 import io.papermc.paper.plugin.loader.PluginClasspathBuilder;
 import io.papermc.paper.plugin.loader.PluginLoader;
@@ -18,6 +18,7 @@ public class CoreLoader implements PluginLoader {
         
         resolver.addRepository(new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2/").build());
         resolver.addDependency(new Dependency(new DefaultArtifact("com.zaxxer:HikariCP:6.3.0"), null));
+        resolver.addDependency(new Dependency(new DefaultArtifact("net.kyori:adventure-api:4.21.0"), null));
         
         classpath.addLibrary(resolver);
     }

@@ -1,0 +1,11 @@
+plugins {
+    id("java-library")
+}
+
+dependencies {
+    compileOnlyApi("io.papermc.paper:paper-api:1.21.5-R0.1-SNAPSHOT")
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+}
