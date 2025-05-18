@@ -33,6 +33,13 @@ public interface BroPlayerManager {
     void leave(Player player);
 
     /**
+     * Inserts, for the first time, the player's data in the database.
+     * 
+     * @param player The new player.
+     */
+    void create(BroPlayer player);
+
+    /**
      * Saves the data of the provided player in the database.
      *
      * @param player The player which needs its data to be saved.

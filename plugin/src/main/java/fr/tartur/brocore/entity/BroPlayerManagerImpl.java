@@ -47,10 +47,36 @@ public class BroPlayerManagerImpl implements BroPlayerManager {
     @Override
     public void leave(Player player) {
         final UUID uuid = player.getUniqueId();
-        final BroPlayer broPlayerImpl = this.players.remove(uuid);
+        final BroPlayer broPlayer = this.players.remove(uuid);
         
-        if (broPlayerImpl != null) {
-            this.save(broPlayerImpl);
+        if (broPlayer != null) {
+            this.save(broPlayer);
+        }
+    }
+
+    @Override
+    public void create(BroPlayer player) {
+        final Optional<Connection> connectionTrial = this.source.getConnection();
+        
+        if (connectionTrial.isEmpty()) {
+            return;
+        }
+        
+        try (final Connection connection = connectionTrial.get()) {
+            final PreparedStatement statement = connection.prepareStatement("INSERT INTO bros(uuid, pseudo, ranks, exp, balance) " +
+                    "VALUES (?, ?, ?, ?, ?)");
+            statement.setString(1, player.getUniqueId().toString());
+            statement.setString(2, player.getName());
+            statement.setString(3, String.join(",", player.getRanks()));
+            statement.setDouble(4, player.getExperience());
+            statement.setDouble(5, player.getBalance());
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            log.severe("An error has occurred while inserting data of player '%s' in the database: %s"
+                    .formatted(player.getName(), exception));
+
+            player.asBukkit().sendMessage(Component.text("Une erreur est survenue lors de la sauvegarde de " +
+                    "vos données. Contactez un administrateur au plus vite.").color(NamedTextColor.RED));
         }
     }
 
@@ -105,9 +131,14 @@ public class BroPlayerManagerImpl implements BroPlayerManager {
             statement.setString(1, player.getUniqueId().toString());
             
             final ResultSet result = statement.executeQuery();
-            player.setRanks(new ArrayList<>(List.of(result.getString("ranks").split(","))));
-            player.setExperience(result.getDouble("exp"));
-            player.setBalance(result.getDouble("balance"));
+            
+            if (result.next()) {
+                player.setRanks(new ArrayList<>(List.of(result.getString("ranks").split(","))));
+                player.setExperience(result.getDouble("exp"));
+                player.setBalance(result.getDouble("balance"));
+            } else {
+                this.create(player);
+            }
         } catch (SQLException exception) {
             log.severe("An error has occurred while fetching data of player '%s' from the database: %s"
                     .formatted(player.getName(), exception));
