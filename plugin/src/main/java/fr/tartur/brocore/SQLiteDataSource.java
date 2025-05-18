@@ -29,7 +29,6 @@ public class SQLiteDataSource {
         this.log = core.getLogger();
         
         final HikariConfig config = new HikariConfig();
-        config.setDataSourceClassName("org.sqlite.SQLiteDataSource");
         config.setJdbcUrl("jdbc:sqlite:" + this.getPath("database.file"));
         this.database = new HikariDataSource(config);
     }
