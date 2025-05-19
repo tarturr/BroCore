@@ -37,21 +37,25 @@ public class BroPlayerManagerImpl implements BroPlayerManager {
     }
 
     @Override
-    public void join(Player player) {
+    public BroPlayer join(Player player) {
         final UUID uuid = player.getUniqueId();
         final BroPlayer broPlayer = new BroPlayerImpl(uuid);
         this.fetch(broPlayer);
         this.players.put(uuid, broPlayer);
+        
+        return broPlayer;
     }
 
     @Override
-    public void leave(Player player) {
+    public BroPlayer leave(Player player) {
         final UUID uuid = player.getUniqueId();
         final BroPlayer broPlayer = this.players.remove(uuid);
         
         if (broPlayer != null) {
             this.save(broPlayer);
         }
+        
+        return broPlayer;
     }
 
     @Override

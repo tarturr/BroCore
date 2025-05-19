@@ -22,15 +22,17 @@ public interface BroPlayerManager {
      * Adds a player to the {@code BroPlayer} list.
      *
      * @param player The connecting player.
+     * @return The player wrapped in a {@link BroPlayer} instance.
      */
-    void join(Player player);
+    BroPlayer join(Player player);
 
     /**
      * Removes a player from the {@code BroPlayer} list.
      *
      * @param player The disconnecting player.
+     * @return The player wrapped in a {@link BroPlayer} instance.
      */
-    void leave(Player player);
+    BroPlayer leave(Player player);
 
     /**
      * Inserts, for the first time, the player's data in the database.
