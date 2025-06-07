@@ -1,6 +1,6 @@
 package fr.tartur.brocore.entity;
 
-import fr.tartur.brocore.SQLiteDataSource;
+import fr.tartur.brocore.database.DatabaseDataSource;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.LuckPerms;
@@ -21,16 +21,16 @@ public class BroPlayerManagerImpl implements BroPlayerManager {
     private final Map<UUID, BroPlayer> players;
     private final Logger log;
     private final LuckPerms luckPerms;
-    private final SQLiteDataSource source;
+    private final DatabaseDataSource source;
 
     /**
      * Basic class constructor, which needs the {@code SQLiteDataSource} to make database interactions and the plugin
      * {@code Logger} to send messages to the console.
      * 
      * @param log The plugin {@link Logger}.
-     * @param source The {@link SQLiteDataSource} needed to make database interactions.
+     * @param source The {@link DatabaseDataSource} needed to make database interactions.
      */
-    public BroPlayerManagerImpl(Logger log, SQLiteDataSource source) {
+    public BroPlayerManagerImpl(Logger log, DatabaseDataSource source) {
         this.log = log;
         this.players = new HashMap<>();
         

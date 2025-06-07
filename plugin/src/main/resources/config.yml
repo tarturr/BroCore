@@ -1,6 +1,18 @@
 database:
+  # Database type. Currently supported types are:
+  #     - SQLite
+  #     - MariaDB
+  type: "MariaDB"
+  
   # The database initialization SQL script. If not found, the plugin will create a default one.
   init: "init-db.sql"
   
-  # The path to the SQLite database file.
+  # The path to the SQLite database file, if type is "SQLite".
   file: "bros_data/bros_data.db"
+  
+  # The database credentials, if type is "MariaDB".
+  credentials:
+    # N.B. : The host must be formed as "<host>:<port>".
+    host: "mariadb:3306"
+    user: "root"
+    password: ""
