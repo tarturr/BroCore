@@ -3,7 +3,11 @@ package fr.tartur.brocore.entity;
 import fr.tartur.brocore.SQLiteDataSource;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.model.user.User;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,6 +20,7 @@ public class BroPlayerManagerImpl implements BroPlayerManager {
     
     private final Map<UUID, BroPlayer> players;
     private final Logger log;
+    private final LuckPerms luckPerms;
     private final SQLiteDataSource source;
 
     /**
@@ -28,12 +33,32 @@ public class BroPlayerManagerImpl implements BroPlayerManager {
     public BroPlayerManagerImpl(Logger log, SQLiteDataSource source) {
         this.log = log;
         this.players = new HashMap<>();
+        
+        final RegisteredServiceProvider<LuckPerms> provider = Bukkit.getServicesManager()
+                .getRegistration(LuckPerms.class);
+        
+        this.luckPerms = provider == null ? null : provider.getProvider();
         this.source = source;
     }
 
     @Override
     public Optional<BroPlayer> getPlayer(Player player) {
         return Optional.ofNullable(this.players.get(player.getUniqueId()));
+    }
+
+    @Override
+    public boolean isLuckPermsLoaded() {
+        return this.luckPerms != null;
+    }
+
+    @Override
+    public Optional<User> getLuckPermsData(Player player) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<User> getLuckPermsData(UUID uuid) {
+        return Optional.empty();
     }
 
     @Override
@@ -67,13 +92,15 @@ public class BroPlayerManagerImpl implements BroPlayerManager {
         }
         
         try (final Connection connection = connectionTrial.get()) {
-            final PreparedStatement statement = connection.prepareStatement("INSERT INTO bros(uuid, pseudo, ranks, exp, balance) " +
-                    "VALUES (?, ?, ?, ?, ?)");
+            final PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO bros(uuid, pseudo, exp, balance) " +
+                    "VALUES (?, ?, ?, ?)"
+            );
+            
             statement.setString(1, player.getUniqueId().toString());
             statement.setString(2, player.getName());
-            statement.setString(3, String.join(",", player.getRanks()));
-            statement.setDouble(4, player.getExperience());
-            statement.setDouble(5, player.getBalance());
+            statement.setDouble(3, player.getExperience());
+            statement.setDouble(4, player.getBalance());
             statement.executeUpdate();
         } catch (SQLException exception) {
             log.severe("An error has occurred while inserting data of player '%s' in the database: %s"
@@ -98,12 +125,11 @@ public class BroPlayerManagerImpl implements BroPlayerManager {
         
         try (final Connection connection = connectionTrial.get()) {
             final PreparedStatement statement = connection.prepareStatement("UPDATE bros " +
-                    "SET ranks = ?, exp = ?, balance = ?" +
+                    "SET exp = ?, balance = ?" +
                     "WHERE uuid = ?");
-            statement.setString(1, String.join(",", player.getRanks()));
-            statement.setDouble(2, player.getExperience());
-            statement.setDouble(3, player.getBalance());
-            statement.setString(4, player.getUniqueId().toString());
+            statement.setDouble(1, player.getExperience());
+            statement.setDouble(2, player.getBalance());
+            statement.setString(3, player.getUniqueId().toString());
             
             statement.executeUpdate();
             player.save();
@@ -130,14 +156,13 @@ public class BroPlayerManagerImpl implements BroPlayerManager {
         }
         
         try (final Connection connection = connectionTrial.get()) {
-            final PreparedStatement statement = connection.prepareStatement("SELECT ranks, exp, balance " +
+            final PreparedStatement statement = connection.prepareStatement("SELECT exp, balance " +
                     "FROM bros WHERE uuid = ?");
             statement.setString(1, player.getUniqueId().toString());
             
             final ResultSet result = statement.executeQuery();
             
             if (result.next()) {
-                player.setRanks(new ArrayList<>(List.of(result.getString("ranks").split(","))));
                 player.setExperience(result.getDouble("exp"));
                 player.setBalance(result.getDouble("balance"));
             } else {

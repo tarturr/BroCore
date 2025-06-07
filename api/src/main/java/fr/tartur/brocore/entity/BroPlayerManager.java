@@ -1,8 +1,10 @@
 package fr.tartur.brocore.entity;
 
+import net.luckperms.api.model.user.User;
 import org.bukkit.entity.Player;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Handles the data of a {@link BroPlayer} list, including caching and database interactions.
@@ -17,6 +19,33 @@ public interface BroPlayerManager {
      * found.
      */
     Optional<BroPlayer> getPlayer(Player player);
+
+    /**
+     * Checks if the {@code LuckPerms} dependency is loaded.
+     * 
+     * @return {@code true} if so, {@code false} otherwise.
+     */
+    boolean isLuckPermsLoaded();
+
+    /**
+     * If the provided {@link Player} has LuckPerms data stored in cache (which is not sure if player is offline),
+     * returns a {@link User} object.
+     *
+     * @param player The player to get the LuckPerms information from.
+     * @return An {@code Optional} wrapping the LuckPerms user, or {@code Optional.empty()} if no data was found in
+     * cache.
+     */
+    Optional<User> getLuckPermsData(Player player);
+
+    /**
+     * If the {@link Player} associated with the provided {@link UUID} has LuckPerms data stored in cache (which is not
+     * sure if player is offline), returns a {@link User} object.
+     *
+     * @param uuid The UUID of the player to get the LuckPerms information from.
+     * @return An {@code Optional} wrapping the LuckPerms user, or {@code Optional.empty()} if no data was found in
+     * cache.
+     */
+    Optional<User> getLuckPermsData(UUID uuid);
 
     /**
      * Adds a player to the {@code BroPlayer} list.

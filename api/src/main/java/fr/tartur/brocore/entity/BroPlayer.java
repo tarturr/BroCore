@@ -2,7 +2,6 @@ package fr.tartur.brocore.entity;
 
 import org.bukkit.entity.Player;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface BroPlayer {
@@ -27,34 +26,6 @@ public interface BroPlayer {
      * @return The player's name.
      */
     String getName();
-
-    /**
-     * Gets the rank list of the player.
-     *
-     * @return A {@link List} containing all the ranks of the player.
-     */
-    List<String> getRanks();
-
-    /**
-     * Overwrites the player's rank list with the provided one.
-     *
-     * @param ranks The new player's ranks.
-     */
-    void setRanks(List<String> ranks);
-
-    /**
-     * Adds a new rank to the player's rank list.
-     *
-     * @param rank The rank to add.
-     */
-    void addRank(String rank);
-
-    /**
-     * Removes a rank from the player's rank list.
-     *
-     * @param rank The rank to remove.
-     */
-    void removeRank(String rank);
 
     /**
      * Gets the player's experience from cache.

@@ -3,8 +3,6 @@ package fr.tartur.brocore.entity;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -14,7 +12,6 @@ public class BroPlayerImpl implements BroPlayer {
     
     private final UUID uuid;
     private final Player player;
-    private List<String> ranks;
     private double experience;
     private double balance;
     private boolean edited;
@@ -28,7 +25,6 @@ public class BroPlayerImpl implements BroPlayer {
     public BroPlayerImpl(UUID uuid) {
         this.uuid = uuid;
         this.player = Bukkit.getPlayer(uuid);
-        this.ranks = new ArrayList<>();
         this.experience = 0;
         this.balance = 0;
         this.edited = false;
@@ -47,26 +43,6 @@ public class BroPlayerImpl implements BroPlayer {
     @Override
     public String getName() {
         return this.player.getName();
-    }
-
-    @Override
-    public List<String> getRanks() {
-        return List.of();
-    }
-
-    @Override
-    public void setRanks(List<String> ranks) {
-        this.ranks = ranks;
-    }
-
-    @Override
-    public void addRank(String rank) {
-        this.ranks.add(rank);
-    }
-
-    @Override
-    public void removeRank(String rank) {
-        this.ranks.remove(rank);
     }
 
     @Override
