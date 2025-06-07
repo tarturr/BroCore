@@ -1,7 +1,7 @@
-package fr.tartur.brocore;
+package fr.tartur.brocore.database;
 
-import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import fr.tartur.brocore.Core;
 
 import java.io.*;
 import java.sql.Connection;
@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 /**
  * Class holding the SQLite data source.
  */
-public class SQLiteDataSource {
+public class DatabaseDataSource {
     
     private final HikariDataSource database;
     private final Core core;
@@ -24,13 +24,10 @@ public class SQLiteDataSource {
      * 
      * @param core The plugin instance.
      */
-    public SQLiteDataSource(Core core) {
+    public DatabaseDataSource(Core core, HikariConfigProvider provider) {
         this.core = core;
         this.log = core.getLogger();
-        
-        final HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:sqlite:" + this.getPath("database.file"));
-        this.database = new HikariDataSource(config);
+        this.database = new HikariDataSource(provider.getConfig());
     }
 
     /**
