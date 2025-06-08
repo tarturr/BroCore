@@ -17,8 +17,9 @@ public class CoreLoader implements PluginLoader {
         final MavenLibraryResolver resolver = new MavenLibraryResolver();
         
         resolver.addRepository(new RemoteRepository.Builder("central", "default", "https://repo1.maven.org/maven2/").build());
-        resolver.addDependency(new Dependency(new DefaultArtifact("com.zaxxer:HikariCP:6.3.0"), null));
+        resolver.addDependency(new Dependency(new DefaultArtifact("com.zaxxer:HikariCP:6.2.1"), null));
         resolver.addDependency(new Dependency(new DefaultArtifact("net.kyori:adventure-api:4.21.0"), null));
+        resolver.addDependency(new Dependency(new DefaultArtifact("net.luckperms:api:5.4"), null));
         
         classpath.addLibrary(resolver);
     }

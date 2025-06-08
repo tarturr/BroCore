@@ -44,14 +44,14 @@ public class PlayerInOutListener implements Listener {
         event.quitMessage(user
                 .map(value ->
                         this.styleMessage(Component.text('-', NamedTextColor.DARK_RED), value, player.getName())
-                ).orElseGet(() ->
+                ).orElse(
                         this.styleMessage(Component.text('-', NamedTextColor.DARK_RED), player.getName())
                 )
         );
     }
 
     private Component styleMessage(Component icon, User user, String playerName) {
-        Component message = Component.text("[", NamedTextColor.GRAY)
+        final Component message = Component.text("[", NamedTextColor.GRAY)
                 .append(icon)
                 .append(Component.text("] ", NamedTextColor.GRAY));
 
@@ -59,7 +59,7 @@ public class PlayerInOutListener implements Listener {
             final var prefix = user.getNodes(NodeType.PREFIX).stream().findFirst();
             
             if (prefix.isPresent()) {
-                message = message.append(Component.text(prefix.get().getMetaValue() + " "));
+                return message.append(Component.text(prefix.get().getMetaValue() + " " + playerName));
             }
         }
 
