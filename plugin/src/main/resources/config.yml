@@ -14,5 +14,6 @@ database:
   credentials:
     # N.B. : The host must be formed as "<host>:<port>".
     host: "mariadb:3306"
+    database: "babychouland"
     user: "root"
     password: ""

@@ -27,7 +27,10 @@ public class MariaDBHikariConfigProvider implements HikariConfigProvider {
     @Override
     public HikariConfig getConfig() {
         final HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mariadb://" + this.configuration.getString("database.credentials.host"));
+        config.setJdbcUrl("jdbc:mariadb://%s/%s".formatted(
+                this.configuration.getString("database.credentials.host"),
+                this.configuration.getString("database.credentials.database")
+        ));
         config.setUsername(this.configuration.getString("database.credentials.user"));
         config.setPassword(this.configuration.getString("database.credentials.password"));
         return config;
